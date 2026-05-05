@@ -21,3 +21,7 @@ go build -o notely && ./notely
 *This starts the server in non-database mode.* It will serve a simple webpage at `http://localhost:8080`.
 
 You do *not* need to set up a database or any interactivity on the webpage yet. Instructions for that will come later in the course!
+
+Nat's version of Boot.dev's Notely app.
+
+![GitHub Actions CI build status badge indicating the current state of automated tests and builds for this repository](https://github.com/ncor81/learn-cicd-starter/actions/workflows/ci.yml/badge.svg)
