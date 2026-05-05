@@ -1,0 +1,9 @@
+{
+  "editor.formatOnSave": false,
+  "editor.formatOnPaste": false,
+  "editor.formatOnType": false,
+  "[go]": {
+    "editor.formatOnSave": false
+  },
+  "go.formatTool": "disabled"
+}
