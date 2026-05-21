@@ -67,10 +67,10 @@ func TestGetAPIKey(t *testing.T) {
 		t.Run(tc.name, func(c *testing.T) {
 			got, err := GetAPIKey(tc.headers)
 			if got != tc.want {
-				c.Errorf("expected apiKey to be '%s', got: '%s'", tc.want, got)
+				c.Errorf("%s: , expected apiKey to be '%s', got: '%s'", tc.name, tc.want, got)
 			}
 			if (err == nil) != (tc.wantErr == nil) || (err != nil && err.Error() != tc.wantErr.Error()) {
-				c.Errorf("expected error: %v, got: %v", tc.wantErr, err)
+				c.Errorf("%s: expected error: %v, got: %v", tc.name, tc.wantErr, err)
 			}
 		})
 	}
