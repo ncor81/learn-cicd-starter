@@ -7,54 +7,71 @@ import (
 )
 
 func TestGetAPIKey(t *testing.T) {
-	// Nominal/valid case: correct ApiKey header
-	apiKey, err := GetAPIKey(http.Header{"Authorization": []string{"ApiKey 12345"}})
-	if err != nil {
-		t.Errorf("expected no error, got: %v", err)
+	type test struct {
+		name    string
+		headers http.Header
+		want    string
+		wantErr error
 	}
-	if apiKey != "12345" {
-		t.Errorf("expected apiKey to be '12345', got: %v", apiKey)
+	tests := []test{
+		{
+			name:    "valid API key",
+			headers: http.Header{"Authorization": []string{"ApiKey 12345"}},
+			want:    "12345",
+			wantErr: nil,
+		},
+		{
+			name:    "no auth header",
+			headers: http.Header{},
+			want:    "",
+			wantErr: ErrNoAuthHeaderIncluded,
+		},
+		{
+			name:    "malformed auth header",
+			headers: http.Header{"Authorization": []string{"InvalidHeader"}},
+			want:    "",
+			wantErr: errors.New("malformed authorization header"),
+		},
+		{
+			name:    "wrong autho type",
+			headers: http.Header{"Authorization": []string{"Bearer 12345"}},
+			want:    "",
+			wantErr: errors.New("malformed authorization header"),
+		},
+		{
+			name:    "extra spaces in auth header",
+			headers: http.Header{"Authorization": []string{"ApiKey	12345"}},
+			want:    "",
+			wantErr: errors.New("malformed authorization header"),
+		},
+		{
+			name:    "miltiple auth headers",
+			headers: http.Header{"Authorization": []string{"ApiKey 12345", "ApiKey 67890"}},
+			want:    "12345",
+			wantErr: nil,
+		},
+		{
+			name:    "auth header with extra spaces",
+			headers: http.Header{"Authorization": []string{"  ApiKey 12345  "}},
+			want:    "",
+			wantErr: errors.New("malformed authorization header"),
+		},
+		{
+			name:    "auth header with only ApiKey",
+			headers: http.Header{"Authorization": []string{"ApiKey"}},
+			want:    "",
+			wantErr: errors.New("malformed authorization header"),
+		},
 	}
-
-	// no auth header included
-	_, err = GetAPIKey(http.Header{})
-	if !errors.Is(err, ErrNoAuthHeaderIncluded) {
-		t.Errorf("expected error: %v, got: %v", ErrNoAuthHeaderIncluded, err)
-	}
-
-	// malformed auth header
-	_, err = GetAPIKey(http.Header{"Authorization": []string{"InvalidHeader"}})
-	if err == nil || err.Error() != "malformed authorization header" {
-		t.Errorf("expected error: %v, got: %v", "malformed authorization header", err)
-	}
-
-	// wrong auth type
-	_, err = GetAPIKey(http.Header{"Authorization": []string{"Bearer 12345"}})
-	if err == nil || err.Error() != "malformed authorization header" {
-		t.Errorf("expected error: %v, got: %v", "malformed authorization header", err)
-	}
-
-	// extra spaces in auth header
-	_, err = GetAPIKey(http.Header{"Authorization": []string{"ApiKey	12345"}})
-	if err == nil || err.Error() != "malformed authorization header" {
-		t.Errorf("expected error: %v, got: %v", "malformed authorization header", err)
-	}
-
-	// multiple auth headers (should take the first one)
-	_, err = GetAPIKey(http.Header{"Authorization": []string{"ApiKey 12345", "ApiKey 67890"}})
-	if err != nil {
-		t.Errorf("expected no error, got: %v", err)
-	}
-
-	// auth header with extra spaces
-	_, err = GetAPIKey(http.Header{"Authorization": []string{"  ApiKey 12345  "}})
-	if err == nil || err.Error() != "malformed authorization header" {
-		t.Errorf("expected error: %v, got: %v", "malformed authorization header", err)
-	}
-
-	// auth header with only "ApiKey"
-	_, err = GetAPIKey(http.Header{"Authorization": []string{"ApiKey"}})
-	if err == nil || err.Error() != "malformed authorization header" {
-		t.Errorf("expected error: %v, got: %v", "malformed authorization header", err)
+	for _, tc := range tests {
+		t.Run(tc.name, func(c *testing.T) {
+			got, err := GetAPIKey(tc.headers)
+			if got != tc.want {
+				c.Errorf("%s: , expected apiKey to be '%s', got: '%s'", tc.name, tc.want, got)
+			}
+			if (err == nil) != (tc.wantErr == nil) || (err != nil && err.Error() != tc.wantErr.Error()) {
+				c.Errorf("%s: expected error: %v, got: %v", tc.name, tc.wantErr, err)
+			}
+		})
 	}
 }

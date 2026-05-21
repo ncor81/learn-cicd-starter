@@ -2,3 +2,34 @@ out
 .env
 learn-cicd-starter
 notely
+
+# VS Code
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+
+# Dependencies
+vendor/
+go.sum (optional - some teams do commit this)
+
+# Test coverage
+*.cover
+coverage.out
+*.coverprofile
+
+# IDE temp files
+*.swp
+*.swo
+*~
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
